@@ -4,7 +4,7 @@ This repository is the official implementation of Chain-of-Zoom: Extreme Super-R
 
 [Bryan Sangwoo Kim](https://scholar.google.com/citations?user=ndWU-84AAAAJ&hl=en), [Jeongsol Kim](https://jeongsol.dev/), [Jong Chul Ye](https://bispl.weebly.com/professor.html)
 
-![main figure](assets/teaser.png)
+![main figure](assets/teaser.jpg)
 
 ---
 ## 🔥 Summary
