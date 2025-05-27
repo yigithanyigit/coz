@@ -1,6 +1,6 @@
 # Chain-of-Zoom: Extreme Super-Resolution via Scale Autoregression and Preference Alignment
 
-This repository is the official implementation of Chain-of-Zoom: Extreme Super-Resolution via Scale Autoregression and Preference Alignment, led by
+This repository is the official implementation of [Chain-of-Zoom: Extreme Super-Resolution via Scale Autoregression and Preference Alignment](https://arxiv.org/abs/2505.18600), led by
 
 [Bryan Sangwoo Kim](https://scholar.google.com/citations?user=ndWU-84AAAAJ&hl=en), [Jeongsol Kim](https://jeongsol.dev/), [Jong Chul Ye](https://bispl.weebly.com/professor.html)
 
@@ -63,7 +63,7 @@ Which will give a result like below:
 
 ![main figure](assets/example_result.png)
 
-## Efficient Memory
+## 🔬 Efficient Memory
 Using ```--efficient_memory``` allows CoZ to run on a single GPU with 24GB VRAM, but highly increases inference time due to offloading. \
 We recommend using two GPUs.
 
