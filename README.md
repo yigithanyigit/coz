@@ -6,6 +6,9 @@ This repository is the official implementation of [Chain-of-Zoom: Extreme Super-
 
 ![main figure](assets/teaser.jpg)
 
+[![Project Website](https://img.shields.io/badge/Project-Website-blue)](https://bryanswkim.github.io/chain-of-zoom.github.io/)
+[![arXiv](https://img.shields.io/badge/arXiv-2505.18600-b31b1b.svg)](https://arxiv.org/abs/2505.18600)
+
 ---
 ## 🔥 Summary
 
