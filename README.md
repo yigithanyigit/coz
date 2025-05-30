@@ -70,6 +70,18 @@ Which will give a result like below:
 Using ```--efficient_memory``` allows CoZ to run on a single GPU with 24GB VRAM, but highly increases inference time due to offloading. \
 We recommend using two GPUs.
 
+## 📝 Citation
+If you find our method useful, please cite as below or leave a star to this repository.
+
+```
+@article{kim2025chain,
+  title={Chain-of-Zoom: Extreme Super-Resolution via Scale Autoregression and Preference Alignment},
+  author={Kim, Bryan Sangwoo and Kim, Jeongsol and Ye, Jong Chul},
+  journal={arXiv preprint arXiv:2505.18600},
+  year={2025}
+}
+```
+
 ## 🤗 Acknowledgements
 We thank the authors of [OSEDiff](https://github.com/cswry/OSEDiff) for sharing their awesome work!
 
