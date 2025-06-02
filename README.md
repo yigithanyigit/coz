@@ -60,7 +60,7 @@ python inference_coz.py \
   --vae_path ckpt/SR_VAE/vae_encoder_20001.pt \
   --pretrained_model_name_or_path 'stabilityai/stable-diffusion-3-medium-diffusers' \
   --ram_ft_path ckpt/DAPE/DAPE.pth \
-  --ram_path ckpt/RAM/ram_swin_large_14m.pth \
+  --ram_path ckpt/RAM/ram_swin_large_14m.pth;
 ```
 Which will give a result like below:
 
