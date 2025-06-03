@@ -69,29 +69,21 @@ def main():
             print(f"  Note: {info['note']}")
         print()
     
-    # Check for user-provided checkpoints
-    print("\nChecking for user-provided checkpoints...")
+    # Check for checkpoints already in repo
+    print("\nChecking checkpoint files...")
     
-    required_files = [
+    checkpoint_files = [
         ("ckpt/SR_LoRA/model_20001.pkl", "SR LoRA weights"),
         ("ckpt/SR_VAE/vae_encoder_20001.pt", "VAE encoder weights"),
         ("ckpt/DAPE/DAPE.pth", "DAPE fine-tuned weights"),
     ]
     
-    missing = []
-    for path, desc in required_files:
+    for path, desc in checkpoint_files:
         if os.path.exists(path):
-            print(f"✓ Found {desc}: {path}")
+            size = os.path.getsize(path) / (1024 * 1024)  # MB
+            print(f"✓ Found {desc}: {path} ({size:.1f} MB)")
         else:
             print(f"✗ Missing {desc}: {path}")
-            missing.append((path, desc))
-    
-    if missing:
-        print("\n⚠️  Missing required checkpoint files:")
-        print("These files are custom trained models from the paper authors.")
-        print("Please obtain them from the paper authors or train your own.\n")
-        for path, desc in missing:
-            print(f"  - {path} ({desc})")
     
     # Download RAM model
     print("\n" + "="*50)
@@ -133,8 +125,8 @@ def main():
         print("\n✓ All required models are available!")
         print("You can now run the Chain-of-Zoom service.")
     else:
-        print("\n⚠️  Some required models are missing.")
-        print("Please obtain the missing checkpoint files before running the service.")
+        print("\n⚠️  Only the RAM base model is missing.")
+        print("Run this script to download it automatically.")
     
     print("\nNote: SD3 model will be downloaded automatically from HuggingFace on first run.")
     print("Make sure you have HuggingFace credentials configured if needed.")
