@@ -6,12 +6,14 @@
 pip install git+https://github.com/cccntu/Chain-of-Zoom.git
 ```
 
+The first time you use the service, it will automatically download the required RAM model (~5.6GB) to `~/.cache/chain-of-zoom/`.
+
 ## Usage
 
 ### As a Python Library
 
 ```python
-from coz_zoom_service import ChainOfZoomService
+from chain_of_zoom import ChainOfZoomService
 
 # Initialize service
 service = ChainOfZoomService()
