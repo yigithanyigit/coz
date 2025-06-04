@@ -38,7 +38,8 @@ def upscale_image(image_path: str, scale: float, output_path: str = None, api_ur
             json={
                 "image": image_base64,
                 "scale": scale,
-                "user_prompt": "highly detailed, sharp"
+                "user_prompt": "highly detailed, sharp",
+                "max_side": 8192  # Allow up to 8K outputs
             },
             timeout=300  # 5 minutes timeout for large images
         )

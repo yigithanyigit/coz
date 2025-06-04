@@ -78,7 +78,8 @@ def upscale_flexible(image_path: str, scale: float, output_path: str = None):
         json={
             "image": image_base64,
             "scale": scale,
-            "user_prompt": "highly detailed"
+            "user_prompt": "highly detailed",
+            "max_side": 8192  # Allow larger outputs
         }
     )
     

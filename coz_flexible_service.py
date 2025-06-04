@@ -27,7 +27,7 @@ class FlexibleChainOfZoomService(BaseService):
                                 image: Union[Image.Image, str, bytes],
                                 scale: float,
                                 user_prompt: str = "",
-                                max_side: int = 2048) -> Image.Image:
+                                max_side: int = 8192) -> Image.Image:
         """
         Process an image with a specific scale factor.
         
@@ -153,7 +153,7 @@ def create_flexible_api():
         image: str  # Base64 encoded image
         scale: float = 4.0  # Target scale factor
         user_prompt: Optional[str] = ""
-        max_side: Optional[int] = 2048
+        max_side: Optional[int] = 8192  # Allow up to 8K images
     
     @app.post("/upscale")
     async def upscale_image(request: ProcessRequest):
