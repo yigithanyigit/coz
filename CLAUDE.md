@@ -22,72 +22,149 @@ For each zoom step:
 4. Apply color correction to maintain consistency
 5. Repeat for desired number of zoom steps
 
-## Implementation Details
+## Implementation Journey
 
-### Model Architecture
+### Phase 1: Understanding the Repository
 
-- **OSEDiff_SD3_TEST**: Main SR model class that loads LoRA weights into SD3
-- **SD3Euler**: Base SD3 model wrapper with text encoders, VAE, and transformer
-- **LoRA Injection**: Applied to transformer (AdaLayerNormZero layers) and VAE encoder
+**Key Findings:**
+- The repository includes pre-trained checkpoint files (SR_LoRA, SR_VAE, DAPE)
+- Only the RAM base model (~5.6GB) needs to be downloaded
+- The core logic is in `inference_coz.py` with complex file I/O and intermediate saves
+- Multiple recursion modes with different prompt generation strategies
 
-### Recommended Configuration
+**File Structure Analysis:**
+- `osediff_sd3.py`: Contains the SR model classes (OSEDiff_SD3_TEST, SD3Euler)
+- `ram/`: Complete RAM model implementation with LoRA support
+- `lora/`: LoRA layer implementations
+- `utils/wavelet_color_fix.py`: Color correction utilities
+- `ckpt/`: Checkpoint files (included in repo except RAM base model)
 
-Based on the scripts and README example:
-- **Prompt Type**: VLM with recursive_multiscale (best) or DAPE with recursive (faster)
-- **Models**: SD3-medium, RAM with DAPE fine-tuning
-- **Parameters**: 4x upscale, 512px processing, wavelet color fix
-- **Zoom Steps**: 4 (default, can go up to 8)
+### Phase 2: Creating a Unified Service
 
-### Memory Optimization
+**Initial Implementation (`coz_service_unified.py`):**
+- Consolidated scattered logic into a single `ChainOfZoomService` class
+- Fixed configuration to recommended preset (DAPE + recursive mode)
+- Automatic RAM model download on initialization
+- Removed file I/O overhead, process in memory
 
-- Multi-GPU: Text encoders on GPU:0, transformer/VAE on GPU:1
-- Single GPU: All on same device, optional --efficient_memory flag
-- Efficient mode moves models between CPU/GPU as needed
+**API Wrapper (`coz_api_minimal.py`):**
+- Minimal FastAPI with just `/process` and `/health` endpoints
+- Base64 image encoding for REST API
+- Fixed 512x512 processing size (limitation)
 
-## Service Implementation
+### Phase 3: Making it Pip-Installable
 
-Created a unified service with two files:
+**Package Structure (`pyproject.toml`):**
+- Used modern pyproject.toml with hatchling
+- No directory reorganization needed
+- Created `serve.py` entry point
+- Console script: `coz-serve`
 
-### 1. coz_service_unified.py
+**Issues Encountered:**
+- Module import path confusion (fixed by using direct `serve:app`)
+- Checkpoint files already in repo (only RAM needs download)
 
-Single class `ChainOfZoomService` that encapsulates all logic:
-- Fixed to DAPE+recursive preset (best balance of quality/speed)
-- Loads models once in `__init__`
-- Main `process()` method handles the recursive zoom
-- Clean separation of concerns with private methods
-- Optional VLM mode available via `process_with_vlm()`
+### Phase 4: Portable Self-Contained Service
 
-### 2. coz_api_minimal.py
+**`coz_portable_service.py`:**
+- Self-contained class with automatic model downloads
+- Multiple usage modes: CLI, API server, or library
+- Downloads to `~/.cache/chain-of-zoom/`
+- Flexible initialization options
 
-Minimal FastAPI wrapper:
-- `/process` - Returns base64 encoded result
-- `/health` - Service health check
-- Simple request model: image, zoom_steps, user_prompt
-
-### Key Design Decisions
-
-1. **Single Preset**: Removed configuration complexity, uses recommended DAPE+recursive
-2. **In-Memory Processing**: No intermediate file I/O unlike the CLI
-3. **Unified Class**: All logic in one place, no scattered functions
-4. **Minimal API**: Only essential endpoints, no configuration options
-
-### Usage
-
+**Key Features:**
 ```python
 # As a library
-from coz_service_unified import ChainOfZoomService
 service = ChainOfZoomService()
-output = service.process(input_image, zoom_steps=4)
+output = service.process_image("input.png", zoom_steps=4)
 
-# As an API
-python coz_api_minimal.py
-# Test with: python test_coz_api.py samples/0064.png 4
+# As API server
+python coz_portable_service.py --serve
+
+# As CLI tool
+python coz_portable_service.py --input img.png --output result.png
 ```
 
-## Technical Notes
+### Phase 5: Flexible Scaling for Arbitrary Dimensions
 
-- The service maintains the same core algorithm as the CLI but optimized for serving
-- Text encoders use fp16, transformer/VAE use fp32 for stability
-- LoRA rank is fixed at 4 (optimal for the pre-trained weights)
-- Each zoom step processes a 512x512 image regardless of recursion depth
-- Color correction is essential for maintaining visual consistency across zoom levels
+**Problem:** Original implementation processes at fixed 512x512, losing aspect ratio
+
+**Solution (`coz_flexible_service.py`):**
+- `FlexibleChainOfZoomService` extends base service
+- `process_image_with_scale()` method for arbitrary scaling
+- Preserves aspect ratio: n×m → (n×s)×(m×s)
+- Supports any scale factor (not just powers of 4)
+
+**Implementation Details:**
+- Calculate zoom steps: `ceil(log4(scale))`
+- Process at original aspect ratio
+- Final resize to exact target dimensions
+- `max_side` parameter to prevent OOM (default: 8192)
+
+**API Enhancement:**
+- New endpoint: `POST /upscale` with scale parameter
+- Returns exact scaled dimensions
+- Handles non-power-of-4 scales gracefully
+
+### Phase 6: Client Tools
+
+**Created Multiple Clients:**
+1. `test_coz_api.py` - Basic testing client
+2. `client_example.py` - Shows scale calculations
+3. `simple_upscale_client.py` - Auto-detects which server
+4. `upscale.py` - Clean CLI for flexible scaling
+
+**Usage Example:**
+```bash
+# Start flexible server
+python coz_flexible_service.py --serve
+
+# Upscale image by 2.5x
+python upscale.py image.png 2.5
+```
+
+## Technical Implementation Notes
+
+### Model Loading Strategy
+- SD3 components distributed across GPUs if available
+- Text encoders: fp16 for memory efficiency
+- Transformer/VAE: fp32 for stability
+- LoRA weights injected at runtime
+
+### Scaling Mathematics
+- Each zoom step = 4x upscale
+- For scale S: need `ceil(log4(S))` zoom steps
+- Example: 2x scale = 1 step, 5x scale = 2 steps (achieves 16x, then downscale)
+
+### Memory Considerations
+- Fixed 512x512 processing in original implementation
+- Flexible version processes at scaled dimensions
+- GPU memory usage increases with zoom steps
+- Recommended: 24GB+ VRAM for high resolutions
+
+### Current Limitations
+1. Maximum 8 zoom steps (256x theoretical max)
+2. Processing time increases linearly with zoom steps
+3. Very large images may require tiling (not implemented)
+4. Prompt quality affects output quality significantly
+
+## Lessons Learned
+
+1. **Research Code vs Production**: Research code often has complex file I/O and intermediate outputs that aren't needed for production serving
+
+2. **Model Distribution**: Including checkpoint files in the repo (except large base models) simplifies deployment
+
+3. **Flexibility vs Simplicity**: Started with fixed configuration for simplicity, but real-world usage requires flexibility (aspect ratio, arbitrary scales)
+
+4. **API Design**: Base64 encoding works but has size limitations; could use multipart uploads for large images
+
+5. **Automatic Downloads**: Following HuggingFace pattern of automatic model downloads improves user experience
+
+## Future Improvements
+
+1. **Tiling Support**: For images larger than GPU memory
+2. **Batch Processing**: Process multiple images efficiently
+3. **Streaming**: Progressive output for long processing times
+4. **Docker Image**: With pre-downloaded models
+5. **WebUI**: User-friendly interface
+6. **Optimization**: Implement efficient attention mechanisms for larger images
