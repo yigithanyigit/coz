@@ -13,7 +13,7 @@ import base64
 import torch
 import requests
 from pathlib import Path
-from PIL import Image, ImageDraw
+from PIL import Image
 from tqdm import tqdm
 from typing import Optional, Union, Tuple, List
 from torchvision import transforms
@@ -182,10 +182,6 @@ class ChainOfZoomService:
             if return_intermediate:
                 results.append(current_image.copy())
         
-        # Add zoom region visualization to final image
-        if not return_intermediate:
-            current_image = self._add_zoom_indicator(current_image, zoom_regions[-1])
-        
         return results if return_intermediate else current_image
     
     def _generate_prompt(self, image: Image.Image, user_prompt: str, zoom_level: int) -> str:
@@ -225,27 +221,6 @@ class ChainOfZoomService:
         
         return output_pil
     
-    def _add_zoom_indicator(self, image: Image.Image, zoom_region: Tuple[float, float, float, float]) -> Image.Image:
-        """Add visual indicator showing zoom region on original image."""
-        # Create a copy
-        result = image.copy()
-        draw = ImageDraw.Draw(result)
-        
-        # Draw zoom region indicator
-        w, h = image.size
-        x1 = int(zoom_region[0] * w)
-        y1 = int(zoom_region[1] * h)
-        x2 = int(zoom_region[2] * w)
-        y2 = int(zoom_region[3] * h)
-        
-        # Draw rectangle
-        draw.rectangle([x1, y1, x2, y2], outline='red', width=2)
-        
-        # Add text
-        zoom_factor = int(1 / ((zoom_region[2] - zoom_region[0]) * (zoom_region[3] - zoom_region[1])))
-        draw.text((10, 10), f"Zoom: {zoom_factor}x", fill='red')
-        
-        return result
     
     def _resize_and_center_crop(self, img: Image.Image, size: int) -> Image.Image:
         """Resize and center crop image."""
