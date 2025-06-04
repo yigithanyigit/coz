@@ -6,6 +6,8 @@ from torchvision import transforms
 from PIL import Image
 from typing import Optional
 import tempfile
+import requests
+from tqdm import tqdm
 
 # Original imports from inference_coz.py:12-14
 from ram.models.ram_lora import ram
@@ -54,8 +56,71 @@ class ChainOfZoomService:
         # Initialize models
         self._initialize_models()
         
+    def _download_file_with_progress(self, url: str, dest_path: str) -> bool:
+        """Download a file with progress bar if it doesn't exist."""
+        if os.path.exists(dest_path):
+            return True
+        
+        os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+        print(f"Downloading {os.path.basename(dest_path)}...")
+        
+        try:
+            response = requests.get(url, stream=True)
+            response.raise_for_status()
+            
+            total_size = int(response.headers.get('content-length', 0))
+            
+            with open(dest_path, 'wb') as f:
+                with tqdm(total=total_size, unit='iB', unit_scale=True, desc=os.path.basename(dest_path)) as pbar:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        f.write(chunk)
+                        pbar.update(len(chunk))
+            
+            print(f"✓ Downloaded {os.path.basename(dest_path)}")
+            return True
+            
+        except Exception as e:
+            print(f"✗ Failed to download {os.path.basename(dest_path)}: {e}")
+            if os.path.exists(dest_path):
+                os.remove(dest_path)
+            return False
+    
+    def _ensure_models_available(self):
+        """Ensure all required models are available, downloading if necessary."""
+        # Check and download RAM model if needed
+        ram_path = self.ram_path
+        if not os.path.exists(ram_path):
+            print(f"\nRAM model not found at {ram_path}")
+            print("Downloading from HuggingFace (this may take a while, ~5.6GB)...")
+            
+            ram_url = "https://huggingface.co/spaces/xinyu1205/recognize-anything/resolve/main/ram_swin_large_14m.pth"
+            if not self._download_file_with_progress(ram_url, ram_path):
+                raise RuntimeError(
+                    f"Failed to download RAM model. Please manually download from:\n"
+                    f"{ram_url}\n"
+                    f"and save to: {ram_path}"
+                )
+        
+        # Verify other required files exist (already in repo)
+        required_files = [
+            (self.lora_path, "SR LoRA weights"),
+            (self.vae_path, "VAE encoder weights"),
+            (self.ram_ft_path, "DAPE weights"),
+        ]
+        
+        for path, desc in required_files:
+            if not os.path.exists(path):
+                raise FileNotFoundError(
+                    f"{desc} not found at {path}. "
+                    f"This file should be included in the repository. "
+                    f"Please ensure you have cloned the complete repository."
+                )
+    
     def _initialize_models(self):
         """Initialize all required models."""
+        # Ensure models are available first
+        self._ensure_models_available()
+        
         print("Initializing Chain-of-Zoom models...")
         
         # Initialize SR model

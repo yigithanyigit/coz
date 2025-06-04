@@ -28,11 +28,19 @@ async def startup_event():
     
     This replaces the model initialization section in inference_coz.py:172-231
     but loads models once at startup instead of on each run.
+    
+    The service will automatically download the RAM model if not present.
     """
     global service
     print("Starting Chain-of-Zoom service...")
-    service = ChainOfZoomService()
-    print("Service ready!")
+    print("This will download missing models on first run (~5.6GB for RAM model)")
+    
+    try:
+        service = ChainOfZoomService()
+        print("Service ready!")
+    except Exception as e:
+        print(f"Failed to initialize service: {e}")
+        raise
 
 
 @app.post("/process")
