@@ -1,0 +1,73 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "chain-of-zoom"
+version = "0.1.0"
+description = "Chain-of-Zoom: Extreme Super-Resolution via Scale Autoregression"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Bryan Sangwoo Kim"},
+    {name = "Jeongsol Kim"},
+    {name = "Jong Chul Ye"},
+]
+requires-python = ">=3.8"
+dependencies = [
+    "accelerate==1.4.0",
+    "diffusers==0.32.1",
+    "fairscale==0.4.13",
+    "fastapi>=0.100.0",
+    "huggingface-hub==0.29.3",
+    "loralib==0.1.2",
+    "lpips==0.1.4",
+    "numpy==2.1.2",
+    "peft==0.15.2",
+    "pillow==11.1.0",
+    "qwen-vl-utils[decord]==0.0.8",
+    "requests==2.32.3",
+    "safetensors==0.5.3",
+    "scipy==1.15.2",
+    "timm==1.0.15",
+    "torch==2.4.1",
+    "torchvision==0.19.1",
+    "tqdm==4.67.1",
+    "transformers==4.49.0",
+    "uvicorn[standard]>=0.23.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/cccntu/Chain-of-Zoom"
+Documentation = "https://github.com/cccntu/Chain-of-Zoom#readme"
+Repository = "https://github.com/cccntu/Chain-of-Zoom.git"
+Issues = "https://github.com/cccntu/Chain-of-Zoom/issues"
+
+[project.scripts]
+coz-serve = "serve:main"
+
+[tool.hatch.version]
+path = "pyproject.toml"
+pattern = 'version = "(?P<version>[^"]+)"'
+
+[tool.hatch.build]
+include = [
+    "*.py",
+    "ram/",
+    "lora/",
+    "utils/",
+    "ckpt/DAPE/*.pth",
+    "ckpt/SR_LoRA/*.pkl",
+    "ckpt/SR_VAE/*.pt",
+]
+exclude = [
+    "*.pyc",
+    "__pycache__",
+    ".git",
+    "inference_results/",
+    "samples/",
+    "scripts/",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
