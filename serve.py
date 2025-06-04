@@ -291,8 +291,9 @@ def main():
     print(f"Starting server at http://{args.host}:{args.port}")
     print("API docs available at http://localhost:8000/docs")
     
+    # When installed via pip, this module is 'serve', not 'chain_of_zoom.serve'
     uvicorn.run(
-        "serve:app" if __name__ == "__main__" else "chain_of_zoom.serve:app",
+        "serve:app",
         host=args.host,
         port=args.port,
         reload=args.reload
