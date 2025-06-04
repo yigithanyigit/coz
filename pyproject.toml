@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "chain-of-zoom"
 version = "0.1.0"
-description = "Chain-of-Zoom: Extreme Super-Resolution via Scale Autoregression"
+description = "Chain-of-Zoom: Extreme zoom into image regions with AI-guided detail synthesis"
 readme = "README.md"
 license = {file = "LICENSE"}
 authors = [
@@ -43,8 +43,6 @@ Documentation = "https://github.com/cccntu/Chain-of-Zoom#readme"
 Repository = "https://github.com/cccntu/Chain-of-Zoom.git"
 Issues = "https://github.com/cccntu/Chain-of-Zoom/issues"
 
-[project.scripts]
-coz-serve = "serve:main"
 
 [tool.hatch.version]
 path = "pyproject.toml"
