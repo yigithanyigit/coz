@@ -109,10 +109,15 @@ if __name__ == "__main__":
     image_path = sys.argv[1]
     scale = float(sys.argv[2])
     
-    print("\n=== Using standard API (512x512 processing) ===")
-    upscale(image_path, scale)
-    
-    print("\n=== For aspect-ratio preserving scaling ===")
-    print("Run: python coz_flexible_service.py --serve")
-    print("Then uncomment the line below:")
-    # upscale_flexible(image_path, scale)
+    # Check which server is running by trying the flexible endpoint first
+    try:
+        response = requests.get("http://localhost:8000/")
+        if response.status_code == 200 and "Flexible" in response.text:
+            print("\n=== Using flexible API (aspect-ratio preserving) ===")
+            upscale_flexible(image_path, scale)
+        else:
+            print("\n=== Using standard API (512x512 processing) ===")
+            upscale(image_path, scale)
+    except:
+        print("\n=== Trying standard API (512x512 processing) ===")
+        upscale(image_path, scale)
