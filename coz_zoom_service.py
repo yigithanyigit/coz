@@ -143,37 +143,36 @@ class ChainOfZoomService:
         for step in range(zoom_steps):
             print(f"Zoom step {step + 1}/{zoom_steps} (total zoom: {4**(step+1)}x)...")
             
-            # Calculate zoom region
-            if step > 0:
-                # Get the region to zoom into (1/4 of current area = 1/2 width, 1/2 height)
-                w, h = current_image.size
-                crop_w, crop_h = w // 2, h // 2
-                
-                # Calculate crop bounds centered at specified point
-                cx = int(center[0] * w)
-                cy = int(center[1] * h)
-                
-                # Ensure crop stays within bounds
-                left = max(0, min(w - crop_w, cx - crop_w // 2))
-                top = max(0, min(h - crop_h, cy - crop_h // 2))
-                right = left + crop_w
-                bottom = top + crop_h
-                
-                # Crop and resize back to process size
-                cropped = current_image.crop((left, top, right, bottom))
-                current_image = cropped.resize((w, h), Image.BICUBIC)
-                
-                # Update zoom region tracking
-                prev_region = zoom_regions[-1]
-                region_w = prev_region[2] - prev_region[0]
-                region_h = prev_region[3] - prev_region[1]
-                new_region = (
-                    prev_region[0] + (left / w) * region_w,
-                    prev_region[1] + (top / h) * region_h,
-                    prev_region[0] + (right / w) * region_w,
-                    prev_region[1] + (bottom / h) * region_h
-                )
-                zoom_regions.append(new_region)
+            # Calculate zoom region - Always crop, not just after first step
+            # Get the region to zoom into (1/4 of current area = 1/2 width, 1/2 height)
+            w, h = current_image.size
+            crop_w, crop_h = w // 2, h // 2
+            
+            # Calculate crop bounds centered at specified point
+            cx = int(center[0] * w)
+            cy = int(center[1] * h)
+            
+            # Ensure crop stays within bounds
+            left = max(0, min(w - crop_w, cx - crop_w // 2))
+            top = max(0, min(h - crop_h, cy - crop_h // 2))
+            right = left + crop_w
+            bottom = top + crop_h
+            
+            # Crop and resize back to process size
+            cropped = current_image.crop((left, top, right, bottom))
+            current_image = cropped.resize((w, h), Image.BICUBIC)
+            
+            # Update zoom region tracking
+            prev_region = zoom_regions[-1]
+            region_w = prev_region[2] - prev_region[0]
+            region_h = prev_region[3] - prev_region[1]
+            new_region = (
+                prev_region[0] + (left / w) * region_w,
+                prev_region[1] + (top / h) * region_h,
+                prev_region[0] + (right / w) * region_w,
+                prev_region[1] + (bottom / h) * region_h
+            )
+            zoom_regions.append(new_region)
             
             # Generate prompt and apply SR
             prompt_text = self._generate_prompt(current_image, user_prompt, step + 1)
