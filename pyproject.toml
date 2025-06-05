@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "chain-of-zoom"
-version = "0.1.0"
+version = "0.2.0"
 description = "Chain-of-Zoom: Extreme zoom into image regions with AI-guided detail synthesis"
 readme = "README.md"
 license = {file = "LICENSE"}
