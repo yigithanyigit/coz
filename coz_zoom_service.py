@@ -141,7 +141,7 @@ class ChainOfZoomService:
         
         # Zoom iterations
         for step in range(zoom_steps):
-            print(f"Zoom step {step + 1}/{zoom_steps} (total zoom: {4**(step+1)}x)...")
+            # print(f"Zoom step {step + 1}/{zoom_steps} (total zoom: {4**(step+1)}x)...")
             
             # Calculate zoom region - Always crop, not just after first step
             # Get the region to zoom into (1/4 of current area = 1/2 width, 1/2 height)
