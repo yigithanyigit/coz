@@ -158,15 +158,15 @@ class ChainOfZoomService:
             right = left + crop_w
             bottom = top + crop_h
             
-            print(f"DEBUG: Image size: {w}x{h}, Crop size: {crop_w}x{crop_h}")
-            print(f"DEBUG: Center: ({cx}, {cy}), Crop bounds: ({left}, {top}, {right}, {bottom})")
-            print(f"DEBUG: Crop region size: {right-left}x{bottom-top}")
+            # print(f"DEBUG: Image size: {w}x{h}, Crop size: {crop_w}x{crop_h}")
+            # print(f"DEBUG: Center: ({cx}, {cy}), Crop bounds: ({left}, {top}, {right}, {bottom})")
+            # print(f"DEBUG: Crop region size: {right-left}x{bottom-top}")
             
             # Crop and resize back to process size
             cropped = current_image.crop((left, top, right, bottom))
-            print(f"DEBUG: Cropped size: {cropped.size}")
+            # print(f"DEBUG: Cropped size: {cropped.size}")
             current_image = cropped.resize((w, h), Image.BICUBIC)
-            print(f"DEBUG: Resized back to: {current_image.size}")
+            # print(f"DEBUG: Resized back to: {current_image.size}")
             
             # Update zoom region tracking
             prev_region = zoom_regions[-1]
